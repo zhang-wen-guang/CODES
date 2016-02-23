@@ -1,0 +1,80 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+B	BitMap.c	/^    int R, G, B;$/;"	m	struct:color	file:
+Bresenham	BitMap.c	/^void Bresenham(int x1, int y1, int x2, int y2)$/;"	f
+BresenhamCircle	BitMap.c	/^void BresenhamCircle(int x0, int y0, int r)$/;"	f
+G	BitMap.c	/^    int R, G, B;$/;"	m	struct:color	file:
+GetbfOffBits	BitMap.c	/^int GetbfOffBits()$/;"	f
+GetbfSize	BitMap.c	/^int GetbfSize()$/;"	f
+GetbfType	BitMap.c	/^int GetbfType(char *buf)$/;"	f
+GetbiBitCount	BitMap.c	/^int GetbiBitCount()$/;"	f
+GetbiHeight	BitMap.c	/^int GetbiHeight()$/;"	f
+GetbiSize	BitMap.c	/^int GetbiSize()$/;"	f
+GetbiWidth	BitMap.c	/^int GetbiWidth()$/;"	f
+R	BitMap.c	/^    int R, G, B;$/;"	m	struct:color	file:
+RowSize	BitMap.c	/^int RowSize;$/;"	v
+SetPelsPerMeter	BitMap.c	/^int SetPelsPerMeter(int X, int Y)$/;"	f
+SetbfOffBits	BitMap.c	/^int SetbfOffBits(int bfoffBits)$/;"	f
+SetbfReserved	BitMap.c	/^int SetbfReserved()$/;"	f
+SetbfSize	BitMap.c	/^int SetbfSize(int size)$/;"	f
+SetbfType	BitMap.c	/^int SetbfType(char *buf)$/;"	f
+SetbiBitCount	BitMap.c	/^int SetbiBitCount(short biBitCount)$/;"	f
+SetbiClrImportant	BitMap.c	/^int SetbiClrImportant(int biClrImportant)$/;"	f
+SetbiClrUsed	BitMap.c	/^int SetbiClrUsed(int biClrUsed)$/;"	f
+SetbiCompression	BitMap.c	/^int SetbiCompression(int biCompression)$/;"	f
+SetbiPlanes	BitMap.c	/^int SetbiPlanes()$/;"	f
+SetbiSize	BitMap.c	/^int SetbiSize(int biSize)$/;"	f
+SetbiSizeImage	BitMap.c	/^int SetbiSizeImage()$/;"	f
+SetbiWiHe	BitMap.c	/^int SetbiWiHe(int biWidth, int biHeight)$/;"	f
+b	BitMap.c	/^    double k, b;$/;"	m	struct:line	file:
+broken_line	BitMap.c	/^void broken_line(vertex p[], color cl, double lwidth)$/;"	f
+buf	BitMap.c	/^color buf[1000][1000];$/;"	v
+cmp	BitMap.c	/^int cmp(const void *a, const void *b) {$/;"	f
+color	BitMap.c	/^typedef struct color {$/;"	s	file:
+color	BitMap.c	/^}color;$/;"	t	typeref:struct:color	file:
+cross_point	BitMap.c	/^vertex cross_point(line l1, line l2)$/;"	f
+drawLine_aa	BitMap.c	/^void drawLine_aa(double x1, double y1, double x2, double y2)$/;"	f
+draw_line	BitMap.c	/^void draw_line(vertex s, vertex e, color cl, double lwidth)$/;"	f
+draw_random	BitMap.c	/^void draw_random(vertex p[], color cl, int n) {$/;"	f
+draw_range	BitMap.c	/^void draw_range(vertex s, vertex e, int uplow[], int pos, color cl)$/;"	f
+draw_real_line	BitMap.c	/^void draw_real_line(vertex s, vertex e, color cl)$/;"	f
+dump	BitMap.c	/^void dump() {$/;"	f
+fd	BitMap.c	/^int fd;               \/\/bitmap file 要处理的bitmap文件$/;"	v
+fill	BitMap.c	/^void fill(int s, int e, int up[], int down[], color cl)$/;"	f
+find_max_x	BitMap.c	/^int find_max_x(vertex vt[])$/;"	f
+find_min_x	BitMap.c	/^int find_min_x(vertex vt[])$/;"	f
+fpart	BitMap.c	/^double fpart(double x)$/;"	f
+getcolor	BitMap.c	/^color getcolor(int x, int y)$/;"	f
+height	BitMap.c	/^int width, height;    \/\/image width & height 图像的宽度与高度$/;"	v
+init	BitMap.c	/^int init()$/;"	f
+init_boundary	BitMap.c	/^void init_boundary(int size, int up[], int down[])$/;"	f
+ipart	BitMap.c	/^int ipart(double x)$/;"	f
+k	BitMap.c	/^    double k, b;$/;"	m	struct:line	file:
+line	BitMap.c	/^typedef struct line {$/;"	s	file:
+line	BitMap.c	/^}line;$/;"	t	typeref:struct:line	file:
+line_formula	BitMap.c	/^line line_formula(vertex v1, vertex v2)$/;"	f
+line_vertexes	BitMap.c	/^void line_vertexes(vertex s, vertex e, double lwidth, vertex vt[])$/;"	f
+main	BitMap.c	/^int main()$/;"	f
+myround	BitMap.c	/^int myround(double x)$/;"	f
+offset	BitMap.c	/^int offset;           \/\/bytes from the beginning to the image偏移量$/;"	v
+plot	BitMap.c	/^int plot(int x, int y, char R, char G, char B)$/;"	f
+plotL	BitMap.c	/^int plotL(int x, int y, double light)$/;"	f
+plot_area	BitMap.c	/^void plot_area(int x, int y, double area, color cl, int pos, int uplow[])$/;"	f
+plotaround	BitMap.c	/^void plotaround(int x, int y)$/;"	f
+putdot	BitMap.c	/^void putdot(x0, y0, x, y)$/;"	f
+rfpart	BitMap.c	/^double rfpart(double x)$/;"	f
+slope	BitMap.c	/^double slope(vertex s, vertex e)$/;"	f
+swapdouble	BitMap.c	/^void swapdouble(double *a, double *b)$/;"	f
+swapint	BitMap.c	/^void swapint(int *a, int *b)$/;"	f
+swapvertex	BitMap.c	/^void swapvertex(vertex *v1, vertex *v2)$/;"	f
+vertex	BitMap.c	/^typedef struct vertex {$/;"	s	file:
+vertex	BitMap.c	/^}vertex;$/;"	t	typeref:struct:vertex	file:
+vertex_move	BitMap.c	/^vertex vertex_move(vertex s, double mx, double my)$/;"	f
+width	BitMap.c	/^int width, height;    \/\/image width & height 图像的宽度与高度$/;"	v
+x	BitMap.c	/^    double x, y;$/;"	m	struct:vertex	file:
+y	BitMap.c	/^    double x, y;$/;"	m	struct:vertex	file:
+zigzag	BitMap.c	/^void zigzag(vertex p[], int n, color cl, double lwidth) {$/;"	f
