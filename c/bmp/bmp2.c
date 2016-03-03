@@ -26,7 +26,7 @@ typedef struct direction{
 
 /* 定义一条直线 */
 typedef struct line{
-    double k, b;   //k为斜率, b为截距
+    point s, e;        //s表示起点(start), e表示终点(end)
 }line;
 
 /****************************结构体定义部分结束************************************/
@@ -61,26 +61,24 @@ void swapPoint(point *p1, point *p2) {
     swapDouble(&(p1->y), &(p2->y));
 }
 
-/* 计算斜率 */
-double slope(point s, point e) {
-    return (e.y - s.y) / (e.x - s.x);
-}
-
-/* 根据两个点得到直线的方程 */
-line getLine(point p1, point p2) {
-    line l;
-
-    l.k = (p2.y - p1.y) / (p2.x - p1.x);
-    l.b = p1.y - l.k * p1.x;
-    return l;
-}
-
-/* 求两直线交点 */
+/* 求两直线交点, 直接通过解析几何求解出交点的坐标 */
 point crossPoint(line l1, line l2) {
     point res;  //用于存放计算结果
 
-    res.x = (l2.b - l1.b) / (l1.k - l2.k);
-    res.y = (l1.k * l2.b - l2.k * l1.b) / (l1.k - l2.k);
+    res.x = (l1.e.y * l1.s.x * l2.e.x - l1.e.x * l1.s.y * l2.e.x -  \
+             l1.e.y * l1.s.x * l2.s.x + l1.e.x * l1.s.y * l2.s.x -  \
+             l1.e.x * l2.e.y * l2.s.x + l1.s.x * l2.e.y * l2.s.x +  \
+             l1.e.x * l2.e.x * l2.s.y - l1.s.x * l2.e.x * l2.s.y) / \
+             (l1.e.y * l2.e.x - l1.s.y * l2.e.x - l1.e.x * l2.e.y + \
+             l1.s.x * l2.e.y - l1.e.y * l2.s.x + l1.s.y * l2.s.x +  \
+             l1.e.x * l2.s.y - l1.s.x * l2.s.y);
+    res.y = (l1.e.x * l1.s.y * l2.e.y - l1.e.y * l1.s.x * l2.e.y +  \
+             l1.e.y * l2.e.y * l2.s.x - l1.s.y * l2.e.y * l2.s.x +  \
+             l1.e.y * l1.s.x * l2.s.y - l1.e.x * l1.s.y * l2.s.y -  \
+             l1.e.y * l2.e.x * l2.s.y + l1.s.y * l2.e.x * l2.s.y) / \
+            (l1.s.y * l2.e.x - l1.e.y * l2.e.x + l1.e.x * l2.e.y -  \
+             l1.s.x * l2.e.y + l1.e.y * l2.s.x - l1.s.y * l2.s.x -  \
+             l1.e.x * l2.s.y + l1.s.x * l2.s.y);
     return res;
 }
 
@@ -92,117 +90,65 @@ point movePoint(point s, double x, double y) {
 }
 
 /* 计算四边形的四个顶点, 先只算直线情况 */
+/* 对函数进行了修改, 不再使用斜率k      */
 quadrangle getQuadPoints(point s, point e, double line_width) {
-    double k;                  //直线的斜率
-    double deltaX, deltaY;
     quadrangle res;
+    double deltaX, deltaY;
 
-    if (s.x > e.x) swapPoint(&s, &e);
+    /* 通过解析几何计算出各个顶点相对原来两个点的偏移位置 */
+    deltaY = line_width / ((e.y - s.y) * (e.y - s.y) + (e.x - s.x) * (e.x - s.x)) * (e.x - s.x);
+    deltaX = line_width / ((e.y - s.y) * (e.y - s.y) + (e.x - s.x) * (e.x - s.x)) * (s.y - e.y);
 
-    k = slope(s, e);
-    if (k > 0) {
-        deltaY = line_width / sqrt(1 + k * k) / 2.0;
-        deltaX = deltaY * k;
-
-        res.p1 = movePoint(s, -1.0 * deltaX, deltaY);
-        res.p2 = movePoint(s, deltaX, -1.0 * deltaY);
-        res.p3 = movePoint(e, -1.0 * deltaX, deltaY);
-        res.p4 = movePoint(e, deltaX, -1.0 * deltaY);
-    } else {
-        deltaY = line_width / sqrt(1 + k * k) / 2.0;
-        deltaX = -1.0 * deltaY * k;
-
-        res.p1 = movePoint(s, deltaX, deltaY);
-        res.p2 = movePoint(s, -1.0 * deltaX, -1.0 * deltaY);
-        res.p3 = movePoint(e, deltaX, deltaY);
-        res.p4 = movePoint(e, -1.0 * deltaX, -1.0 * deltaY);
-    }
+    res.p1 = movePoint(s, deltaX, deltaY);
+    res.p2 = movePoint(s, -1.0 * deltaX, -1.0 * deltaY);
+    res.p3 = movePoint(e, deltaX, deltaY);
+    res.p4 = movePoint(e, -1.0 * deltaX, -1.0 * deltaY);
     return res;
 }
 
-/* 处理线段边缘部分, 将计算得到的面积放入pixel_area数组 */
-void lineEdge(point s, point e, char pos) {
-    double leftH, rightH;
-    double k, b;
-    double area;
-    double lc, rc;
-    line l;
-    int i;
+/* 用两个点初始化一条线 */
+line getLine(point a, point b) {
+    line res;   //结果变量
 
-    /* 计算要画的边缘的直线方程 */
-    l = getLine(s, e);
+    res.s.x = a.x;  //将直线的起点赋值为a
+    res.s.y = a.y;
 
-    /* 此直线的斜率 */
-    k = slope(s, e);
-    b = l.b;
-
-    if ((k > 0 && k < 1) || (k < 0 && k > -1)) {
-        if (s.x > e.x) swapPoint(&s, &e);
-        for (i = (int)s.x + 1; i < (int)e.x; ++i) {
-            lc = k * i + b;
-            rc = k * (i + 1) + b;
-        }
-    }
+    res.e.x = b.x;  //将直线的终点赋值为b
+    res.e.y = b.y;
+    return res;
 }
 
-/* 画折线函数, 先实现两段折线, 多段折线实现在后面 */
-void polyLine(point p[], color cl) {
-    int i, j;              //循环变量
-    line u1, d1, u2, di2;  //两段折线的上下边缘
-    quadrangle q1, q2;     //两段线段的四边形
-    double k1, k2;         //两段线段的斜率
-    point intersection1;   //直线的交点
-    point intersection2;
+/* 计算四边形真正的四个顶点 */
+void getRealQuadpoints(quadrangle &a, quadrangle &b) {
+    line a1, a2;      //a四边形的两条边缘线
+    line b1, b2;      //b四边形的两条边缘线
+    point cross1, cross2;  //求出来的两个交点
 
-    /* 计算两段线段的斜率 */
-    k1 = slope(p[0], p[1]);
-    k1 = slope(p[1], p[2]);
+    a1 = getLine(a->p1, a->p3);  //得到第一个四边行的两条线
+    a2 = getLine(a->p2, a->p4);
 
-    /* 分别计算两段线段的顶点 */
-    q1 = getQuadPoints(p[0], p[1], line_width);
-    q2 = getQuadPoints(p[1], p[2], line_width);
+    b1 = getLine(b->p1, b->p3);  //得到第一个四边行的两条线
+    b2 = getLine(b->p2, b->p4);
 
-    /* 求出两段线段上下边缘的直线方程 */
-    u1 = getLine(q1.p1, q1.p3);
-    u2 = getLine(q2.p1, q2.p3);
-    d1 = getLine(q1.p2, q1.p4);
-    d2 = getLine(q2.p2, q2.p4);
+    /* 求出两个交点, 并替换原有的点 */
+    cross1 = crossPoint(a1, b1);   //求两个交点
+    cross2 = crossPoint(a2, b2);
+
+    /* 替换原有点 */
+    a->p3.x = cross1.x;  //替换第一个四边形中的顶点
+    a->p3.y = cross1.y;
     
-    /* 计算交点坐标, 替换原有坐标 */
-    if ((p[1].x - p[0].x) > 0) {
-        if (p[2].x > p[1].x) {
-            intersection1 = crossPoint(u1, u2);
-            intersection2 = crossPoint(d1, d2);
-            q1.p3 = intersection1;
-            q1.p4 = intersection2;
-            q2.p1 = intersection1;
-            q2.p2 = intersection2;
-        } else {
-            intersection1 = crossPoint(u1, d2);
-            intersection2 = crossPoint(d1, u2);
-            q1.p3 = intersection1;
-            q1.p4 = intersection2;
-            q2.p3 = intersection2;
-            q2.p4 = intersection1;
-        }
-    } else {
-        if (p[2].x > p[1].x) {
-            intersection1 = crossPoint(u1, d2);
-            intersection2 = crossPoint(d1, u2);
-            q1.p1 = intersection1;
-            q1.p2 = intersection2;
-            q2.p1 = intersection2;
-            q2.p2 = intersection1;
-        } else {
-            intersection1 = crossPoint(u1, u2);
-            intersection2 = crossPoint(d1, d2);
-            q1.p1 = intersection1;
-            q1.p2 = intersection2;
-            q2.p3 = intersection1;
-            q2.p4 = intersection2;
-        }
-    }
+    a->p4.x = cross2.x;
+    a->p4.y = cross2.y;
+
+    b->p1.x = cross1.x;  //替换第二个四边形中的顶点
+    b->p1.y = cross1.y;
+    
+    b->p2.x = cross2.x;
+    b->p2.y = cross2.y;
 }
+
+/*  */
 
 /* 将内存中的数据写入文件 */
 void dump() {
