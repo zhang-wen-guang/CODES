@@ -48,6 +48,16 @@ color  line_color;    //折线的颜色
 
 /****************************定义各种函数******************************************/
 
+/* 设置一个像素点被图形覆盖的面积 */
+void setPixelArea(int x, int y, double area) {
+	pixel_area[x][y] = area;
+}
+
+/* 从面积数组中取出一个像素点被覆盖的面积 */
+double getPixelArea(int x, int y) {
+	return pixel_area[x][y];
+}
+
 /* 交换两个浮点类型的数字 */
 void swapDouble(double *a, double *b) {
     double tmp;
@@ -120,7 +130,7 @@ line getLine(point a, point b) {
 }
 
 /* 计算四边形真正的四个顶点, 并替换四边形中原有的顶点 */
-void getRealQuadpoints(quadrangle &a, quadrangle &b) {
+void getRealQuadpoints(quadrangle *a, quadrangle *b) {
     line a1, a2;      //a四边形的两条边缘线
     line b1, b2;      //b四边形的两条边缘线
     point cross1, cross2;  //求出来的两个交点
@@ -146,32 +156,80 @@ void getRealQuadpoints(quadrangle &a, quadrangle &b) {
     b->p1.y = cross1.y;
     
     b->p2.x = cross2.x;
-    b->p2.y = cross2.y;
+	b->p2.y = cross2.y;
 }
 
-/* 将一条线段经过的所有像素点涂色 */
-void paintLine(line a) {
-    double deltaY, deltaX;   //线段纵向和横向跨度的绝对值
-    double dirX, dirY;       //线段从起点指向终点的方向向量(dirX, dirY)
-    double length;           //线段的长度
 
-    /* 计算两个跨度绝对值 */
-    deltaY = a.e.y - a.s.y;  //计算线段纵向跨度的绝对值
-    if (deltaY < 0) deltaY = -1.0 * deltaY;
+/* 求绝对值的函数 */
+int abs(int a) {
+    return (a > 0 ? a : -1 * a);
+}
 
-    deltaY = a.e.y - a.s.y;  //计算线段横向跨度的绝对值
-    if (deltaY < 0) deltaY = -1.0 * deltaY;
+/* 将起点到终点的线段经过的所有点都画出来 */
+void paintLine(line l) {
+	int x1, y1, x2, y2; //(x1, y1)为起点, (x2, y2)为终点
+	int x, y;           //(x, y)标记画线时要画的点
+	int p;              //p用来决定要画点的位置
+	int temp;           //用于交换的临时变量
+	int i;              //循环变量
+	int interchange;    //用于记录横纵坐标是否交换过
+    int dx, dy;         //横向与纵向跨度的绝对值
+    int s1, s2;         //用于标记线段的状态
 
-    /* 计算方向向量 */
-    length = (a.e.y - a.s.y) * (a.e.y - a.s.y) + (a.e.x - a.s.x) * (a.e.x - a.s.x);
-    length = sqrt(length);   //首先计算线段的长度
+    x1 = (int)l.s.x;    //为起点与重点赋值
+    y1 = (int)l.s.y;
+    x2 = (int)l.e.x;
+    y2 = (int)l.e.y;
 
-    dirX = (a.e.x - a.s.x) / length;   //方向向量的横向值
-    dirY = (a.e.y - a.s.y) / length;   //方向向量的纵向值
+	x = x1;    //设置要画的起始点
+	y = y1;
 
-    if (deltaY > deltaX) {     //当纵向跨度大时, 我们沿纵向扫描
-    } else {
+	dx = abs(x2 - x1);  //求出横向跨度的绝对值
+	dy = abs(y2 - y1);  //求出纵向跨度的绝对值
+
+	/* 若x2在x1右边, 则向右走, 否则向左走 */
+	if(x2 > x1)
+		s1 = 1;
+	else
+		s1 = -1;
+
+	/* 若y2在y1上面, 则向上走, 否则向下走 */
+	if(y2 > y1)
+		s2 = 1;
+	else
+		s2 = -1;
+
+	/* 若纵向跨度大于横向跨度, 则沿着纵向走, 否则沿着横向走 */
+	if(dy > dx) {
+		temp = dx;
+		dx = dy;
+		dy = temp;
+		interchange = 1;
+	} else {
+		interchange = 0;
     }
+
+	p = 2 * dy - dx;  //p用来标记下一个要画的点的位置
+
+	/* 从起点开始向终点移动                            */
+	/* 以起点在左下, 终点在右上, 且斜率小于1的情况举例 */
+	/* 若p大于0, 则下一个要画的点在上方                */
+	/* 若p小于0, 则下一个要画的点在右方                */
+	for(i = 1; i <= dx; i++) {
+		setPixelArea(x, y, 1.0);
+		if(p >= 0) {
+			if(interchange == 0)
+				y = y + s2;
+			else
+				x = x + s1;
+			p = p - 2 * dx;
+		}
+		if(interchange == 0)
+			x = x + s1; 
+		else
+			y = y + s2;
+		p = p + 2 * dy;
+	}
 }
 
 /* 将内存中的数据写入文件 */
@@ -217,8 +275,12 @@ int main()
 
     /* 读入数据 */
     fscanf(readin, "线宽     :  %lf\n", &line_width);        //读入线宽
+    fscanf(readin, "颜色     :  (%hc, %hc, %hc)\n", &(line_color.R), &line_color.G, &line_color.B); //读入颜色
     fscanf(readin, "点的数量 :  %d\n",  &count_of_points);   //读入点的数量
     fscanf(readin, "顶点     :\n");                          //准备读入顶点坐标
+
+    printf("count_of_points : %d\n", count_of_points);
+    printf("颜色: (%d, %d, %d)\n", line_color.R, line_color.G, line_color.B);
 
     /* 为各顶点分配内存 */
     p = (point *)malloc(sizeof(struct point) * count_of_points);
