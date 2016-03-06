@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 /****************************此部分定义各种结构体*********************************/
@@ -118,7 +119,7 @@ line getLine(point a, point b) {
     return res;
 }
 
-/* 计算四边形真正的四个顶点 */
+/* 计算四边形真正的四个顶点, 并替换四边形中原有的顶点 */
 void getRealQuadpoints(quadrangle &a, quadrangle &b) {
     line a1, a2;      //a四边形的两条边缘线
     line b1, b2;      //b四边形的两条边缘线
@@ -148,7 +149,30 @@ void getRealQuadpoints(quadrangle &a, quadrangle &b) {
     b->p2.y = cross2.y;
 }
 
-/*  */
+/* 将一条线段经过的所有像素点涂色 */
+void paintLine(line a) {
+    double deltaY, deltaX;   //线段纵向和横向跨度的绝对值
+    double dirX, dirY;       //线段从起点指向终点的方向向量(dirX, dirY)
+    double length;           //线段的长度
+
+    /* 计算两个跨度绝对值 */
+    deltaY = a.e.y - a.s.y;  //计算线段纵向跨度的绝对值
+    if (deltaY < 0) deltaY = -1.0 * deltaY;
+
+    deltaY = a.e.y - a.s.y;  //计算线段横向跨度的绝对值
+    if (deltaY < 0) deltaY = -1.0 * deltaY;
+
+    /* 计算方向向量 */
+    length = (a.e.y - a.s.y) * (a.e.y - a.s.y) + (a.e.x - a.s.x) * (a.e.x - a.s.x);
+    length = sqrt(length);   //首先计算线段的长度
+
+    dirX = (a.e.x - a.s.x) / length;   //方向向量的横向值
+    dirY = (a.e.y - a.s.y) / length;   //方向向量的纵向值
+
+    if (deltaY > deltaX) {     //当纵向跨度大时, 我们沿纵向扫描
+    } else {
+    }
+}
 
 /* 将内存中的数据写入文件 */
 void dump() {
