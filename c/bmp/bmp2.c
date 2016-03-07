@@ -17,7 +17,7 @@ typedef struct quadrangle{
 
 /* 颜色结构体 */
 typedef struct color{
-    unsigned char R, G, B;
+    unsigned char B, G, R;
 }color;
 
 /* 定义方向结构体 */
@@ -275,10 +275,11 @@ int main()
 
     /* 读入数据 */
     fscanf(readin, "线宽     :  %lf\n", &line_width);        //读入线宽
-    fscanf(readin, "颜色     :  (%hc, %hc, %hc)\n", &(line_color.R), &line_color.G, &line_color.B); //读入颜色
+    fscanf(readin, "颜色     :  (%hhu, %hhu, %hhu)\n", &(line_color.R), &line_color.G, &line_color.B); //读入颜色
     fscanf(readin, "点的数量 :  %d\n",  &count_of_points);   //读入点的数量
     fscanf(readin, "顶点     :\n");                          //准备读入顶点坐标
 
+    /* 测试用 */
     printf("count_of_points : %d\n", count_of_points);
     printf("颜色: (%d, %d, %d)\n", line_color.R, line_color.G, line_color.B);
 
@@ -307,7 +308,7 @@ int main()
     /* 设置画布的大小 */
     height = (y_max - y_min) + line_width * 2;  //设置画布的高度
     width  = (x_max - x_min) + line_width * 2;  //设置画布的宽度
-    width  = (width / 4 + 1) * 4;      //当画布的宽度不是4的倍数时,适当调整画布的宽度,使它是4的倍数
+    width  = (width / 4 + 1) * 4;               //当画布的宽度不是4的倍数时,适当调整画布的宽度,使它是4的倍数
 
     /* 为存放像素被图形覆盖部分面积的数组分配空间, 并将其初始化 */
     pixel_area = (double **)malloc(sizeof(double *) * height);    //先给每行分配一个指针,指向每行
@@ -440,7 +441,8 @@ int main()
     tmp_color.R = (unsigned char)255;
     tmp_color.G = (unsigned char)255;
     tmp_color.B = (unsigned char)255;
-    dumpGraph(tmp_color);
+    setPixelArea(0, 0, 1.0);
+    dumpGraph(line_color);
     /* 测试部分 */
     
     dump();
