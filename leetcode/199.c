@@ -2,11 +2,24 @@
     > File Name: 199.c
     > Author: ZWG
     > Mail: zhangwg1990@gmail.com 
-    > Created Time: 2016年04月08日 星期五 15时35分27秒
+    > Created Time: 四  4/ 7 22:19:41 2016
  ************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+/**
+ * Return an array of size *returnSize.
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
 
 /**
  * Definition for a binary tree node.
@@ -45,7 +58,10 @@ int* rightSideView(struct TreeNode* root, int* returnSize) {
     while (0 != count1) {
         for (i = 0; i < count1; ++i) {
             if (i == count1 - 1) {
+                //printf("i = %d\n", i);
+                //printf("count1 = %d\n", count1);
                 res[retSize++] = (*p1)->val;
+                //printf("val = %d\n", (*p1)->val);
             }
             if (NULL != (*p1)->left) {
                 *p2 = (*p1)->left;
@@ -57,6 +73,7 @@ int* rightSideView(struct TreeNode* root, int* returnSize) {
                 p2++;
                 count2++;
             }
+            p1++;
         }
         if (0 == count2) {
             *returnSize = retSize;
@@ -74,20 +91,24 @@ int* rightSideView(struct TreeNode* root, int* returnSize) {
 int main()
 {
     int size, *res, i;
-    struct TreeNode t1, t2;
+    struct TreeNode a, b, c;
 
-    t1.right = &t2;
-    t1.left = NULL;
-    t2.left = NULL;
-    t2.right = NULL;
-    t1.val = 1;
-    t2.val = 2;
+    a.val = 1;
+    b.val = 2;
+    c.val = 3;
 
-    res = rightSideView(&t1, &size);
+    a.left = &b;
+    a.right = &c;
+
+    b.left = NULL;
+    b.right = NULL;
+
+    c.left = NULL;
+    c.right = NULL;
+
+    res = rightSideView(&a, &size);
     for (i = 0; i < size; ++i) {
-        printf("%d\t", res[i]);
+        printf("%d\n", res[i]);
     }
-    printf("\n");
-
     return 0;
 }
