@@ -9,11 +9,16 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <string.h>
+#include <arpa/inet.h>
+
+#define MAXLINE 1024
 
 int main(int argc, char **argv)
 {
     int client_socket_fd;
     struct sockaddr_in server_addr;
+    char s[MAXLINE];
 
     /* step 1: create socket fd */
     client_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -22,10 +27,14 @@ int main(int argc, char **argv)
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(8765);
-    if( inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0){
-    printf("inet_pton error for %s\n",argv[1]);
-    exit(0);
-    }
+    inet_pton(AF_INET, argv[1], &server_addr.sin_addr);
 
+    /* step 2: connect to the server */
+    connect(client_socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+    /* step 3: send msg */
+    while (EOF != scanf("%s", s)) {
+        send(client_socket_fd, s, strlen(s), 0);
+    }
     return 0;
 }
