@@ -60,6 +60,7 @@ void *handleThreads(void* no) {
             }
         }
     }
+    return NULL;
 }
 
 int main()
