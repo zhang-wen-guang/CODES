@@ -82,6 +82,7 @@ void *keep_alive() {
 
         }
     }
+    return NULL;
 }
 
 int main()
