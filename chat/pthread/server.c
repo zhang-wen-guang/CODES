@@ -13,15 +13,25 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 #define MAXLINE 1024
 
+/* 自定义结构 */
+typedef struct client{
+    int status;
+    int tcp_no;
+    pthread_t thread_no;
+}client;
+
 char buf[MAXLINE];
 int server_socket_fd;
-pthread_t ths[100];
-int clients[100];
-int count_of_clients = 0;
+int max_client = 0;
+int client_status[100];
+int freed_clients = 0;
+client *clients[100];
 
+/*------------------ 自定义函数 --------------------------*/
 /* 没用到的函数, 用于设置socket为非阻塞模式 */
 static int make_socket_non_blocking (int sfd)  
 {  
@@ -47,17 +57,29 @@ static int make_socket_non_blocking (int sfd)
   return 0;  
 }  
 
-/* 建立一个新的线程 */
-void *handleThreads(void* no) {
+/* 建立一个新的线程,收发消息 */
+void *handleThreads(void* cl) {
+    client *this_client = (client *)cl;
     int msg_len;
-    int tcp_no = *(int *)no;
+    int tcp_no = this_client->tcp_no;
 
     while ((msg_len = recv(tcp_no, buf, MAXLINE, 0)) != 0) {
         buf[msg_len] = '\0';
-        for (int i = 0; i < count_of_clients; ++i) {
-            if (clients[i] != tcp_no) {
-                send(clients[i], buf, strlen(buf), 0);
+        for (int i = 0; i < max_client; ++i) {
+            if (clients[i]->status && clients[i]->tcp_no != tcp_no) {
+                send(clients[i]->tcp_no, buf, strlen(buf), 0);
             }
+        }
+    }
+    this_client->status = 0;
+}
+
+/*  */
+void *keep_alive() {
+    int i = 0;
+    while (1) {
+        for (i = 0; i < max_client; ++i) {
+
         }
     }
 }
@@ -68,7 +90,9 @@ int main()
     struct sockaddr_in server_addr;
     int msg_len;
     int bind_retval;
-    pid_t fpid;
+
+    /* 初始化全局变量 */
+    for (int i = 0; i < 100; ++i) client_status[i] = 0;
 
     /* step 1: create the socket */
     server_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -92,37 +116,29 @@ int main()
     if (-1 == bind_retval)
         printf("bind error\n");
 
-    /* 将socket设置成非阻塞模式,不太行 */
-    //make_socket_non_blocking(server_socket_fd);
-
     /* step 3: listen */
     listen(server_socket_fd, 10);
 
-
-#if 0
     /* step 4: accept */
-
-    int count_of_clients = 0;
-    while (-1 != (tcp_no = accept(server_socket_fd, (struct sockaddr*)NULL, NULL))) {
-        fpid = fork();
-        if (fpid > 0) {
-            continue;  //father
-        } else {
-            clients[count_of_clients++] = tcp_no;
-            break;     //child
-        }
-    }
-#endif
-    
-    /* step 4: accept */
+    int pos;
     while (1) {
-        printf("line 119\n");
         tcp_no = accept(server_socket_fd, (struct sockaddr*)NULL, NULL);
-        printf("tcp_no = %d\n", tcp_no);
-        if (tcp_no > 0) { //有来自client的连接
-            clients[count_of_clients++] = tcp_no;
-            pthread_create(&(ths[count_of_clients - 1]), NULL, &handleThreads, (void *)&tcp_no);
+
+        if (freed_clients) {  //
+            for (int i = 0; i < max_client; ++i) {
+                if (clients[i]->status = 0) {
+                    pos = i;
+                    break;
+                }
+            }
+            freed_clients--;
+        } else {
+            pos = max_client++;
         }
+        clients[pos] = (client *)malloc(sizeof(client));
+        clients[pos]->status = 1;
+        clients[pos]->tcp_no = tcp_no;
+        pthread_create(&(clients[pos]->thread_no), NULL, &handleThreads, (void *)clients[pos]);
     }
 
     return 0;

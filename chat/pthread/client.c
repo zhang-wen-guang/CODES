@@ -12,17 +12,32 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <pthread.h>
 
+/* 宏定义 */
 #define MAXLINE 1024
+
+/* 全局变量 */
+int client_socket_fd;
+char buf[MAXLINE];
+
+/* 自定义函数 */
+void *handle_recv() {
+    int msg_len;
+
+    while ((msg_len = recv(client_socket_fd, buf, MAXLINE, 0)) != 0) {
+        buf[msg_len] = '\0';
+        printf("%s\n", buf);
+    }
+}
 
 int main(int argc, char **argv)
 {
-    int client_socket_fd;
     struct sockaddr_in server_addr;
     char s[MAXLINE];
     char buf[MAXLINE];
     int msg_len;
-    pid_t fpid;
+    //pid_t fpid;
 
     /* step 1: create socket fd */
     client_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -37,16 +52,13 @@ int main(int argc, char **argv)
     connect(client_socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
     /* step 3: send msg */
-    fpid = fork();
-    if (fpid == 0) {
-        while ((msg_len = recv(client_socket_fd, buf, MAXLINE, 0)) != 0) {
-            buf[msg_len] = '\0';
-            printf("%s\n", buf);
-        }
-    } else {
-        while (EOF != scanf("%s", s)) {
-            send(client_socket_fd, s, strlen(s), 0);
-        }
+    pthread_t recv_pthread; //多线程实现
+    pthread_create(&recv_pthread, NULL, &handle_recv, NULL);
+
+    while (EOF != scanf("%s", s)) {
+        send(client_socket_fd, s, strlen(s), 0);
     }
+
+    close(client_socket_fd);
     return 0;
 }
