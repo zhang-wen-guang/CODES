@@ -256,6 +256,11 @@ void dumpGraph(color c) {
     }
 }
 
+/* 清空pixel_area数组 */
+void cleanPixelArea() {
+    int i, j;
+}
+
 /****************************各种函数定义结束**************************************/
 
 int main()
@@ -274,14 +279,19 @@ int main()
     readin = fopen("readin.txt", "r"); //打开要读入数据的文件
 
     /* 读入数据 */
-    fscanf(readin, "线宽     :  %lf\n", &line_width);        //读入线宽
-    fscanf(readin, "颜色     :  (%hhu, %hhu, %hhu)\n", &(line_color.R), &line_color.G, &line_color.B); //读入颜色
-    fscanf(readin, "点的数量 :  %d\n",  &count_of_points);   //读入点的数量
-    fscanf(readin, "顶点     :\n");                          //准备读入顶点坐标
+    int test;
+    fscanf(readin, "%d\n", &test);
+    printf("test = %d\n", test);
+
+    fscanf(readin, "line_width      :  %lf\n", &line_width);        //读入线宽
+    fscanf(readin, "line_color      :  (%hhu, %hhu, %hhu)\n", &(line_color.R), &line_color.G, &line_color.B); //读入颜色
+    fscanf(readin, "count_of_points :  %d\n",  &count_of_points);   //读入点的数量
+    fscanf(readin, "points          :\n");                          //准备读入顶点坐标
 
     /* 测试用 */
     printf("count_of_points : %d\n", count_of_points);
     printf("颜色: (%d, %d, %d)\n", line_color.R, line_color.G, line_color.B);
+
 
     /* 为各顶点分配内存 */
     p = (point *)malloc(sizeof(struct point) * count_of_points);
@@ -441,7 +451,11 @@ int main()
     tmp_color.R = (unsigned char)255;
     tmp_color.G = (unsigned char)255;
     tmp_color.B = (unsigned char)255;
+<<<<<<< HEAD
+    setPixelArea(0, 1, 1);
+=======
     setPixelArea(0, 0, 1.0);
+>>>>>>> c83cb5c7f11980cbb1dbeb493fcc3d0f76b03162
     dumpGraph(line_color);
     /* 测试部分 */
     
