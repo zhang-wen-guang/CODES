@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAXLINE 1024
 
@@ -24,14 +25,14 @@ typedef struct client{
     pthread_t thread_no;
 }client;
 
-char buf[MAXLINE];
+/*--------------------- 全局变量 ----------------------*/
 int server_socket_fd;
 int max_client = 0;
 int client_status[100];
 int freed_clients = 0;
 client *clients[100];
 
-/*------------------ 自定义函数 --------------------------*/
+/*-------------------- 自定义函数 ---------------------*/
 /* 没用到的函数, 用于设置socket为非阻塞模式 */
 static int make_socket_non_blocking (int sfd)  
 {  
@@ -57,20 +58,30 @@ static int make_socket_non_blocking (int sfd)
   return 0;  
 }  
 
+/* 向所有其它client发送消息 */
+void send_msg(int tcp_no, char *buf) {
+    for (int i = 0; i < max_client; ++i) {
+        if (clients[i]->status && clients[i]->tcp_no != tcp_no) {
+            send(clients[i]->tcp_no, buf, strlen(buf), 0);
+        }
+    }
+}
+
 /* 建立一个新的线程,收发消息 */
 void *handleThreads(void* cl) {
+    char buf[MAXLINE];
     client *this_client = (client *)cl;
     int msg_len;
     int tcp_no = this_client->tcp_no;
 
+    strcpy(buf, "欢迎xxx加入聊天室");
+    send_msg(tcp_no, buf);
     while ((msg_len = recv(tcp_no, buf, MAXLINE, 0)) != 0) {
         buf[msg_len] = '\0';
-        for (int i = 0; i < max_client; ++i) {
-            if (clients[i]->status && clients[i]->tcp_no != tcp_no) {
-                send(clients[i]->tcp_no, buf, strlen(buf), 0);
-            }
-        }
+        send_msg(tcp_no, buf);
     }
+    strcpy(buf, "xxx离开了聊天室");
+    send_msg(tcp_no, buf);
     this_client->status = 0;
 }
 
