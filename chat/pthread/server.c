@@ -70,27 +70,32 @@ void send_msg(int tcp_no, char *buf) {
 /* 建立一个新的线程,收发消息 */
 void *handleThreads(void* cl) {
     char buf[MAXLINE];
+    char final_msg[MAXLINE+100];
     client *this_client = (client *)cl;
     int msg_len;
     int tcp_no = this_client->tcp_no;
+    char user_name[100];
 
-    strcpy(buf, "欢迎xxx加入聊天室");
+    msg_len = recv(tcp_no, user_name, 100, 0);
+    user_name[msg_len] = '\0';
+
+    sprintf(buf, "欢迎%s加入聊天室", user_name);
     send_msg(tcp_no, buf);
     while ((msg_len = recv(tcp_no, buf, MAXLINE, 0)) != 0) {
         buf[msg_len] = '\0';
-        send_msg(tcp_no, buf);
+        sprintf(final_msg, "%s : %s", user_name, buf);
+        send_msg(tcp_no, final_msg);
     }
-    strcpy(buf, "xxx离开了聊天室");
-    send_msg(tcp_no, buf);
+    sprintf(final_msg, "%s离开了聊天室");
+    send_msg(tcp_no, final_msg);
     this_client->status = 0;
 }
 
-/*  */
+/* 定时检查客户端连接情况 */
 void *keep_alive() {
     int i = 0;
     while (1) {
         for (i = 0; i < max_client; ++i) {
-
         }
     }
     return NULL;
@@ -136,7 +141,7 @@ int main()
     while (1) {
         tcp_no = accept(server_socket_fd, (struct sockaddr*)NULL, NULL);
 
-        if (freed_clients) {  //
+        if (freed_clients) {  //前面有空余的位置
             for (int i = 0; i < max_client; ++i) {
                 if (clients[i]->status = 0) {
                     pos = i;

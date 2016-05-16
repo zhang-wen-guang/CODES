@@ -3,3 +3,4 @@ tags
 server
 client
 test*
+*.swp
