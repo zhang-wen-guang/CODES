@@ -22,24 +22,32 @@
 
 int* postorderTraversal(struct TreeNode* root, int* returnSize) {
     struct TreeNode* stack[1024];
-    struct TreeNode* cur;
+    struct TreeNode* tmp;
     int top, count;
     int *res;
 
     if (NULL == root) return NULL;
 
     res = (int *)malloc(1024 * sizeof(int));
-    cur = root->left;
     top = 0;
     count = 0;
 
     stack[top++] = root;
 
     while (0 != top) {
-        if (NULL == cur) {
-
-        }
+        tmp = stack[--top];
+        res[count++] = tmp->val;
+        if (tmp->left) stack[top++] = tmp->left;
+        if (tmp->right) stack[top++] = tmp->right;
     }
+
+    for (int i = 0; i < (count + 1) / 2; ++i) {
+        top = res[i];
+        res[i] = res[count - i - 1];
+        res[count - i - 1] = top;
+    }
+    *returnSize = count;
+    return res;
 }
 
 int main()
