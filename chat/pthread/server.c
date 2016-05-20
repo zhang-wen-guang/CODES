@@ -125,18 +125,32 @@ void deleClient(struct client *client) {
         }
     }
 
+    close(client->tcp_no);
     free(client->name);
     free(client);
 }
 
 /* @功能实现 */
-void sendSingle(char *buf) {
+void sendSingle(char *buf, struct client* from) {
     char name[100];
     char msg[MAXLINE];
+    char final_msg[MAXLINE + 100];
+    int pos;
+    struct client *p;
 
     sscanf(buf, "@%s %s", name, msg);
-    printf("name = %s\n", name);
-    printf("msg = %s\n", msg);
+    sprintf(final_msg, "%s : %s\n", name, msg);
+    pos = dictGenHashFunction(name, strlen(name)) % CLIENT_COUNT;
+    p = clients[pos];
+    while (p) {
+        if (0 == strcmp(name, p->name)) {
+            send(p->tcp_no, final_msg, strlen(final_msg), 0);
+            return;
+        }
+        p = p->hash_next;
+    }
+    char unfind[] = "没有这个用户\n";
+    send(from->tcp_no, unfind, strlen(unfind), 0);
 }
 
 /* 建立一个新的线程,收发消息 */
@@ -147,18 +161,18 @@ void *handleThreads(void* cl) {
     int msg_len;
     int tcp_no = this_client->tcp_no;
 
-    sprintf(buf, "欢迎%s加入聊天室", this_client->name);
+    sprintf(buf, "欢迎%s加入聊天室\n", this_client->name);
     send_msg(tcp_no, buf);
     while ((msg_len = recv(tcp_no, buf, MAXLINE, 0)) != 0) {
         buf[msg_len] = '\0';
         if (buf[0] == '@') {
-            sendSingle(buf);
+            sendSingle(buf, this_client);
             continue;
         }
         sprintf(final_msg, "%s : %s", this_client->name, buf);
         send_msg(tcp_no, final_msg);
     }
-    sprintf(final_msg, "%s离开了聊天室", this_client->name);
+    sprintf(final_msg, "%s离开了聊天室\n", this_client->name);
     send_msg(tcp_no, final_msg);
     deleClient(this_client);
 }
