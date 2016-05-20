@@ -28,7 +28,7 @@ void *handle_recv() {
 
     while ((msg_len = recv(client_socket_fd, buf, MAXLINE, 0)) != 0) {
         buf[msg_len] = '\0';
-        printf("%s\n", buf);
+        printf("%s", buf);
     }
 }
 
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     pthread_create(&recv_pthread, NULL, &handle_recv, NULL);
 
     send(client_socket_fd, user_name, strlen(user_name), 0);
-    while (EOF != scanf("%s", s)) {
+    while (NULL != fgets(s, MAXLINE, stdin)) {
         send(client_socket_fd, s, strlen(s), 0);
     }
 
