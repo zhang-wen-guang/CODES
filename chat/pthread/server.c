@@ -37,6 +37,7 @@ typedef struct client{
 int server_socket_fd;
 struct client *clients[CLIENT_COUNT];
 struct client *head = NULL;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 /*-------------------- 自定义函数 ---------------------*/
 
@@ -88,8 +89,11 @@ unsigned int dictGenHashFunction(const void *key, int len) {
 void send_msg(int tcp_no, char *buf) {
     struct client* cur = head;
     while (cur) {
-        if (cur->tcp_no != tcp_no)
+        if (cur->tcp_no != tcp_no) {
+            pthread_mutex_lock(&lock);
             send(cur->tcp_no, buf, strlen(buf), 0);
+            pthread_mutex_unlock(&lock);
+        }
         cur = cur->next;
     }
 }
@@ -144,13 +148,17 @@ void sendSingle(char *buf, struct client* from) {
     p = clients[pos];
     while (p) {
         if (0 == strcmp(name, p->name)) {
+            pthread_mutex_lock(&lock);
             send(p->tcp_no, final_msg, strlen(final_msg), 0);
+            pthread_mutex_unlock(&lock);
             return;
         }
         p = p->hash_next;
     }
     char unfind[] = "没有这个用户\n";
+    pthread_mutex_lock(&lock);
     send(from->tcp_no, unfind, strlen(unfind), 0);
+    pthread_mutex_unlock(&lock);
 }
 
 /* 建立一个新的线程,收发消息 */
