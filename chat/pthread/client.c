@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(8765);
-    inet_pton(AF_INET, argv[1], &server_addr.sin_addr);
+    inet_pton(AF_INET, argv[4], &server_addr.sin_addr);
 
     /* step 2: connect to the server */
     connect(client_socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
