@@ -72,11 +72,26 @@ int main()
         n = epoll_wait(efd, events, maxsize, -1);
         /* 有n个事件响应了, 对这n个事件处理吧 */
         for (int i = 0; i < n; ++i) {
+            /* 第一种情况, 这个事件挂掉了 */
             if ((events[i].events & EPOLLERR) ||
                 (events[i].events & EPOLLHUP) ||
                 (!(events[i].events & EPOLLIN))) {
                 cout << "epoll err" << endl;
                 close(events[i].data.fd);
+            } else if (events[i].data.fd == sfd) {
+                /* 当event.data.fd=sfd时 */
+                /* 我理解, 这里需要做2件事, 1, accept. 2, 注册新的事件 */
+                int infd;
+                infd = accept(sfd, (struct sockaddr *)NULL, NULL);
+
+                /* 注册事件 */
+                set_socket_nonblocking(infd);
+                event.data.fd = infd;
+                event.events = EPOLLIN | EPOLLET;
+                epoll_ctl(efd, EPOLL_CTL_ADD, infd, &event);
+            } else {
+                /* 收到消息, 打印消息就行了 */
+                
             }
         }
     }
