@@ -135,7 +135,6 @@ int main()
             if ((events[i].events & EPOLLERR) ||
                 (events[i].events & EPOLLHUP) ||
                 (!(events[i].events & EPOLLIN))) {
-
                 cout << "name = " <<  clients2[events[i].data.fd] << endl;
                 close(events[i].data.fd);
             } else if (events[i].data.fd == sfd) {
